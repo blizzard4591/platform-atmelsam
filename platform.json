@@ -75,6 +75,11 @@
       "owner": "platformio",
       "version": "~1.8.1"
     },
+    "framework-arduino-samr-catnip": {
+      "type": "framework",
+      "optional": true,
+      "version": "~1.0.0"
+    },
     "framework-arduino-samd-moteino": {
       "type": "framework",
       "optional": true,
@@ -122,6 +127,11 @@
       "optionalVersions": [
         "~1.1.0"
       ]
+    },
+    "framework-cmsis-microchip-samr34": {
+      "type": "framework",
+      "optional": true,
+      "version": "~1.0.0"
     },
     "framework-arduino-mbcwb": {
       "type": "framework",
