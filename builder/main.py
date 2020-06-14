@@ -214,8 +214,7 @@ elif upload_protocol == "sam-ba":
         ],
         UPLOADCMD="$UPLOADER $UPLOADERFLAGS $SOURCES"
     )
-    if board.get("build.core") in ("adafruit", "seeed") and board.get(
-            "build.mcu").startswith("samd51"):
+    if (board.get("build.core") in ("adafruit", "seeed") and board.get("build.mcu").startswith("samd51")) or board.get("build.core") in ("catnip"):
         # special flags for the latest bossac tool
         env.Append(
             UPLOADERFLAGS=[
