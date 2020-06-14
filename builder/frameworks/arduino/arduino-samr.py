@@ -30,11 +30,11 @@ env = DefaultEnvironment()
 platform = env.PioPlatform()
 board = env.BoardConfig()
 
-BUILD_CORE = board.get("build.core", "").lower()
+VENDOR_CORE = board.get("build.core", "").lower()
 
 framework_package = "framework-arduino-samr"
-if BUILD_CORE != "arduino":
-    framework_package += "-%s" % BUILD_CORE
+if VENDOR_CORE != "arduino":
+    framework_package += "-%s" % VENDOR_CORE
 FRAMEWORK_DIR = platform.get_package_dir(framework_package)
 CMSIS_DIR = platform.get_package_dir("framework-cmsis")
 CMSIS_ATMEL_DIR = platform.get_package_dir("framework-cmsis-microchip-samr34")
@@ -43,11 +43,16 @@ assert all(os.path.isdir(d) for d in (FRAMEWORK_DIR, CMSIS_DIR, CMSIS_ATMEL_DIR)
 
 env.SConscript("arduino-common.py")
 
+BUILD_CORE = "arduino"
+if VENDOR_CORE == "sparkfun" and board.get("build.mcu", "").startswith("samd51"):
+    BUILD_CORE = "arduino51"
+
 env.Append(
     CPPPATH=[
         os.path.join(CMSIS_DIR, "CMSIS", "Include"),
         os.path.join(CMSIS_ATMEL_DIR, "cmsis", "include"),
-        os.path.join(CMSIS_ATMEL_DIR, "cmsis", "source")
+        os.path.join(CMSIS_ATMEL_DIR, "cmsis", "source"),
+        os.path.join(FRAMEWORK_DIR, "cores", BUILD_CORE)
     ],
 
     LIBPATH=[
@@ -79,7 +84,7 @@ else:
         LIBS=["arm_cortexM0l_math"]
     )
 
-if BUILD_CORE in ("adafruit", "moteino", "catnip"):
+if VENDOR_CORE in ("seeed", "adafruit", "moteino", "catnip"):
     env.Append(
         CPPDEFINES=[
             ("USB_CONFIG_POWER", board.get("build.usb_power", 100))
@@ -90,22 +95,22 @@ if BUILD_CORE in ("adafruit", "moteino", "catnip"):
         ],
 
         CPPPATH=[
-            os.path.join(FRAMEWORK_DIR, "cores", "arduino", "TinyUSB"),
-            os.path.join(FRAMEWORK_DIR, "cores", "arduino", "TinyUSB",
+            os.path.join(FRAMEWORK_DIR, "cores", BUILD_CORE, "TinyUSB"),
+            os.path.join(FRAMEWORK_DIR, "cores", BUILD_CORE, "TinyUSB",
                  "Adafruit_TinyUSB_ArduinoCore"),
-            os.path.join(FRAMEWORK_DIR, "cores", "arduino", "TinyUSB",
+            os.path.join(FRAMEWORK_DIR, "cores", BUILD_CORE, "TinyUSB",
                  "Adafruit_TinyUSB_ArduinoCore", "tinyusb", "src")
         ]
     )
 
-if BUILD_CORE == "moteino":
+if VENDOR_CORE == "moteino":
     env.Append(
         CPPDEFINES=[
             "ARM_MATH_CM0PLUS"
         ]
     )
 
-if BUILD_CORE == "catnip":
+if VENDOR_CORE == "catnip":
     env.Append(
         CPPDEFINES=[
             "__SAMR34J18B__",
@@ -138,7 +143,7 @@ if "build.variant" in board:
 
 libs.append(env.BuildLibrary(
     os.path.join("$BUILD_DIR", "FrameworkArduino"),
-    os.path.join(FRAMEWORK_DIR, "cores", "arduino")
+    os.path.join(FRAMEWORK_DIR, "cores", BUILD_CORE)
 ))
 
 env.Prepend(LIBS=libs)
