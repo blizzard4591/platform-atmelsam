@@ -64,7 +64,7 @@ class AtmelsamPlatform(PlatformBase):
             if not board.get("build.mcu", "").startswith("samd"):
                 self.packages["framework-arduino-sam"]["optional"] = True
             if framework_package in self.packages:
-            self.packages[framework_package]["optional"] = False
+                self.packages[framework_package]["optional"] = False
             self.packages["framework-cmsis"]["optional"] = False
             self.packages["framework-cmsis-atmel"]["optional"] = False
             if build_core in ("sodaq", "tuino0", "reprap"):
