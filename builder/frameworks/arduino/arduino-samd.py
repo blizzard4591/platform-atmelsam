@@ -48,8 +48,16 @@ if VENDOR_CORE == "sparkfun" and board.get("build.mcu", "").startswith("samd51")
     BUILD_CORE = "arduino51"
 
 env.Append(
+    CPPDEFINES=[
+        "ARDUINO_ARCH_SAMD"
+    ],
+
     CPPPATH=[
-        os.path.join(CMSIS_DIR, "CMSIS", "Include"),
+        os.path.join(
+            CMSIS_DIR,
+            "CMSIS",
+            os.path.join("Core", "Include") if VENDOR_CORE in ("adafruit", "seeed") else "Include",
+        ),  # Adafruit and Seeed cores use CMSIS v5.4 with different folder structure
         os.path.join(CMSIS_ATMEL_DIR, "CMSIS", "Device", "ATMEL"),
         os.path.join(FRAMEWORK_DIR, "cores", BUILD_CORE)
     ],
@@ -83,6 +91,9 @@ else:
         LIBS=["arm_cortexM0l_math"]
     )
 
+
+# USB-specific flags
+
 if VENDOR_CORE in ("seeed", "adafruit", "moteino"):
     env.Append(
         CPPDEFINES=[
@@ -91,21 +102,72 @@ if VENDOR_CORE in ("seeed", "adafruit", "moteino"):
 
         CCFLAGS=[
             "-Wno-expansion-to-defined"
-        ],
-
-        CPPPATH=[
-            os.path.join(FRAMEWORK_DIR, "cores", BUILD_CORE, "TinyUSB"),
-            os.path.join(FRAMEWORK_DIR, "cores", BUILD_CORE, "TinyUSB",
-                "Adafruit_TinyUSB_ArduinoCore"),
-            os.path.join(FRAMEWORK_DIR, "cores", BUILD_CORE, "TinyUSB",
-                "Adafruit_TinyUSB_ArduinoCore", "tinyusb", "src")
         ]
     )
+
+    if VENDOR_CORE == "adafruit":
+        env.Append(
+            CPPDEFINES=[
+                "ARDUINO_SAMD_ADAFRUIT"
+            ],
+            CPPPATH=[
+                os.path.join(
+                    FRAMEWORK_DIR,
+                    "libraries",
+                    "Adafruit_TinyUSB_Arduino",
+                    "src",
+                    "arduino",
+                )
+            ]
+        )
+    else:
+        env.Append(
+            CPPPATH=[
+                os.path.join(FRAMEWORK_DIR, "cores", BUILD_CORE, "TinyUSB"),
+                os.path.join(
+                    FRAMEWORK_DIR,
+                    "cores",
+                    BUILD_CORE,
+                    "TinyUSB",
+                    "Adafruit_TinyUSB_ArduinoCore",
+                ),
+                os.path.join(
+                    FRAMEWORK_DIR,
+                    "cores",
+                    BUILD_CORE,
+                    "TinyUSB",
+                    "Adafruit_TinyUSB_ArduinoCore",
+                    "tinyusb",
+                    "src",
+                ),
+            ]
+        )
+
+#
+# Vendor-specific configurations
+#
+
+if VENDOR_CORE in ("adafruit", "seeed"):
+    env.Append(CPPPATH=[os.path.join(CMSIS_DIR, "CMSIS", "DSP", "Include")])
 
 if VENDOR_CORE == "moteino":
     env.Append(
         CPPDEFINES=[
             "ARM_MATH_CM0PLUS"
+        ]
+    )
+elif VENDOR_CORE == "seeed":
+    env.Append(
+        LINKFLAGS=[
+            "-Wl,--wrap,_write",
+            "-u", "__wrap__write"
+        ]
+    )
+elif VENDOR_CORE == "arduino":
+    env.Prepend(
+        CPPPATH=[
+            os.path.join(FRAMEWORK_DIR, "cores", BUILD_CORE, "api", "deprecated"),
+            os.path.join(FRAMEWORK_DIR, "cores", BUILD_CORE, "api", "deprecated-avr-comp")
         ]
     )
 

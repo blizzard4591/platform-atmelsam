@@ -20,7 +20,7 @@ from os.path import basename, isdir, join
 from SCons.Script import (ARGUMENTS, COMMAND_LINE_TARGETS, AlwaysBuild,
                           Builder, Default, DefaultEnvironment)
 
-from platformio.util import get_serialports
+from platformio.util import get_serial_ports
 
 
 def BeforeUpload(target, source, env):  # pylint: disable=W0613,W0621
@@ -33,7 +33,7 @@ def BeforeUpload(target, source, env):  # pylint: disable=W0613,W0621
     if not bool(upload_options.get("disable_flushing", False)):
         env.FlushSerialBuffer("$UPLOAD_PORT")
 
-    before_ports = get_serialports()
+    before_ports = get_serial_ports()
 
     if bool(upload_options.get("use_1200bps_touch", False)):
         env.TouchSerialPort("$UPLOAD_PORT", 1200)
@@ -48,19 +48,20 @@ def BeforeUpload(target, source, env):  # pylint: disable=W0613,W0621
 
 
 env = DefaultEnvironment()
+env.SConscript("compat.py", exports="env")
 platform = env.PioPlatform()
 board = env.BoardConfig()
 upload_protocol = env.subst("$UPLOAD_PROTOCOL")
 build_mcu = env.get("BOARD_MCU", board.get("build.mcu", ""))
 
 env.Replace(
-    AR="arm-none-eabi-ar",
+    AR="arm-none-eabi-gcc-ar",
     AS="arm-none-eabi-as",
     CC="arm-none-eabi-gcc",
     CXX="arm-none-eabi-g++",
     GDB="arm-none-eabi-gdb",
     OBJCOPY="arm-none-eabi-objcopy",
-    RANLIB="arm-none-eabi-ranlib",
+    RANLIB="arm-none-eabi-gcc-ranlib",
     SIZETOOL="arm-none-eabi-size",
 
     ARFLAGS=["rc"],
@@ -131,6 +132,7 @@ else:
     else:
         target_firm = env.ElfToBin(
             join("$BUILD_DIR", "${PROGNAME}"), target_elf)
+        env.Depends(target_firm, "checkprogsize")
 
 AlwaysBuild(env.Alias("nobuild", target_firm))
 target_buildprog = env.Alias("buildprog", target_firm, target_firm)
@@ -195,9 +197,10 @@ elif upload_protocol.startswith("jlink"):
         UPLOADER="JLink.exe" if system() == "Windows" else "JLinkExe",
         UPLOADERFLAGS=[
             "-device", env.BoardConfig().get("debug", {}).get("jlink_device"),
-            "-speed", "4000",
+            "-speed", env.GetProjectOption("debug_speed", "4000"),
             "-if", ("jtag" if upload_protocol == "jlink-jtag" else "swd"),
-            "-autoconnect", "1"
+            "-autoconnect", "1",
+            "-NoGui", "1"
         ],
         UPLOADCMD='$UPLOADER $UPLOADERFLAGS -CommanderScript "${__jlink_cmd_script(__env__, SOURCE)}"'
     )
@@ -214,7 +217,8 @@ elif upload_protocol == "sam-ba":
         ],
         UPLOADCMD="$UPLOADER $UPLOADERFLAGS $SOURCES"
     )
-    if (board.get("build.core") in ("adafruit", "seeed") and board.get("build.mcu").startswith("samd51")) or board.get("build.core") in ("catnip"):
+    if (board.get("build.core") in ("adafruit", "seeed", "sparkfun") and board.get(
+            "build.mcu").startswith(("samd51", "same51"))) or board.get("build.core") in ("catnip"):
         # special flags for the latest bossac tool
         env.Append(
             UPLOADERFLAGS=[
@@ -266,9 +270,9 @@ elif upload_protocol == "mbctool":
             "--device", "samd",
             "--speed", "1500000",
             "--port", '"$UPLOAD_PORT"',
-            "--upload", "$SOURCES",            
+            "--upload", "$SOURCES",
         ],
-        UPLOADCMD='"$UPLOADER" $UPLOADERFLAGS'       
+        UPLOADCMD='"$UPLOADER" $UPLOADERFLAGS'
     )
     upload_actions = [
         env.VerboseAction(env.AutodetectUploadPort,
@@ -282,6 +286,10 @@ elif upload_protocol in debug_tools:
     ]
     openocd_args.extend(
         debug_tools.get(upload_protocol).get("server").get("arguments", []))
+    if env.GetProjectOption("debug_speed"):
+        openocd_args.extend(
+            ["-c", "adapter speed %s" % env.GetProjectOption("debug_speed")]
+        )
     openocd_args.extend([
         "-c", "program {$SOURCE} %s verify reset; shutdown;" %
         board.get("upload.offset_address", "")
