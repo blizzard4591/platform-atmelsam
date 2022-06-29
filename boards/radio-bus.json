@@ -17,7 +17,9 @@
       ]
     ]
   },
-  "debug": {},
+  "debug": {
+    "jlink_device": "ATSAMR34J18"
+  },
   "frameworks": [ 
     "arduino"
   ],
@@ -31,7 +33,8 @@
     "protocol": "sam-ba",
     "protocols": [
       "sam-ba",
-      "blackmagic"
+      "blackmagic",
+      "jlink"
     ],
     "require_upload_port": true,
     "use_1200bps_touch": true,
