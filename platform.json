@@ -14,25 +14,17 @@
     "SAM D"
   ],
   "engines": {
-    "platformio": "^5"
+    "platformio": "^6"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/platformio/platform-atmelsam.git"
   },
-  "version": "7.1.0",
+  "version": "8.1.0",
   "frameworks": {
     "arduino": {
       "package": "framework-arduino-sam",
       "script": "builder/frameworks/arduino.py"
-    },
-    "mbed": {
-      "package": "framework-mbed",
-      "script": "builder/frameworks/mbed/mbed.py"
-    },
-    "simba": {
-      "package": "framework-simba",
-      "script": "builder/frameworks/simba.py"
     },
     "zephyr": {
       "package": "framework-zephyr",
@@ -61,13 +53,13 @@
       "type": "framework",
       "optional": true,
       "owner": "platformio",
-      "version": "~1.8.11"
+      "version": "~1.8.13"
     },
     "framework-arduino-samd-adafruit": {
       "type": "framework",
       "optional": true,
       "owner": "platformio",
-      "version": "~1.7.2"
+      "version": "~1.7.10"
     },
     "framework-arduino-samd-seeed": {
       "type": "framework",
@@ -148,18 +140,6 @@
       "optional": true,
       "owner": "meteca",
       "version": ">=2.1.1"
-    },
-    "framework-mbed": {
-      "type": "framework",
-      "optional": true,
-      "owner": "platformio",
-      "version": "~4.151.0"
-    },
-    "framework-simba": {
-      "type": "framework",
-      "optional": true,
-      "owner": "platformio",
-      "version": ">=7.0.0"
     },
     "framework-zephyr": {
       "type": "framework",
