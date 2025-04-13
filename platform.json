@@ -20,7 +20,7 @@
     "type": "git",
     "url": "https://github.com/platformio/platform-atmelsam.git"
   },
-  "version": "8.1.0",
+  "version": "8.3.0",
   "frameworks": {
     "arduino": {
       "package": "framework-arduino-sam",
@@ -53,19 +53,19 @@
       "type": "framework",
       "optional": true,
       "owner": "platformio",
-      "version": "~1.8.13"
+      "version": "~1.8.14"
     },
     "framework-arduino-samd-adafruit": {
       "type": "framework",
       "optional": true,
       "owner": "platformio",
-      "version": "~1.7.10"
+      "version": "~1.10716.0"
     },
     "framework-arduino-samd-seeed": {
       "type": "framework",
       "optional": true,
       "owner": "platformio",
-      "version": "~1.8.1"
+      "version": "~1.8.5"
     },
     "framework-arduino-samr-catnip": {
       "type": "framework",
@@ -93,7 +93,7 @@
       "type": "framework",
       "optional": true,
       "owner": "platformio",
-      "version": "~1.8.6"
+      "version": "~1.8.9"
     },
     "framework-arduino-samd-sparkfun": {
       "type": "framework",
@@ -130,17 +130,6 @@
       "optional": true,
       "version": "~1.0.0"
     },
-    "framework-cmsis-microchip-samr34": {
-      "type": "framework",
-      "optional": true,
-      "version": "~1.0.0"
-    },
-    "framework-arduino-mbcwb": {
-      "type": "framework",
-      "optional": true,
-      "owner": "meteca",
-      "version": ">=2.1.1"
-    },
     "framework-zephyr": {
       "type": "framework",
       "optional": true,
@@ -162,16 +151,11 @@
         "~1.10900.0"
       ]
     },
-    "tool-mbctool": {
-      "optional": true,
-      "owner": "meteca",
-      "version": ">=2.0.0"
-    },
     "tool-openocd": {
       "type": "uploader",
       "optional": true,
       "owner": "platformio",
-      "version": "~2.1100.0"
+      "version": "~3.1200.0"
     },
     "tool-jlink": {
       "type": "uploader",
